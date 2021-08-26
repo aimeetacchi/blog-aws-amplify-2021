@@ -1,23 +1,27 @@
 import { useEffect, useState } from 'react'
 import { listPosts } from './graphql/queries'
-import { updatePost } from './graphql/mutations'
+import { updatePost, createLike } from './graphql/mutations'
+import { onCreateLike, onCreatePost, onDeletePost, onUpdatePost } from './graphql/subscriptions';
+
 import { API, graphqlOperation, Auth } from 'aws-amplify'
 import { withAuthenticator } from 'aws-amplify-react';
 
 import './App.css';
 import DisplayPosts from './components/displayposts';
 import CreatePost from './components/createpost';
-import { onCreatePost, onDeletePost, onUpdatePost } from './graphql/subscriptions';
 
 const App = () => {
 
   const [posts, setPosts] = useState([]);
-
   const [subscribePost, setSubscribePost] = useState({});
 
-  const [postOwnerId, setPostOwnerId] = useState('');
-  const [postOwnerUsername, setPostOwnerUsername] = useState('');
-  
+  const [loggedInOwnerId, setLoggedInOwnerId] = useState('');
+  const [loggedInOwnerUsername, setLoggedInOwnerUsername] = useState('');
+
+  const [isHovering, setIsHovering] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [postLikedBy, setPostLikedBy] = useState([]);
+
   const[editPost, setEditPost] = useState({
     show: false,
     id: '',
@@ -33,6 +37,19 @@ const App = () => {
     setPosts(postsItems)
   }
 
+  const likedPost = (postId) => {
+      for(let post of posts) {
+        if(post.id === postId) {
+          if(post.postOwnerId === loggedInOwnerId) return true
+            
+          for (let like of post.likes.items) {
+              if(like.likeOwnerId === loggedInOwnerId) return true
+            }
+        }
+      }
+      return false;
+  }
+
   // setTimeout(() => {
   //   console.log(posts)
   // }, 5000)
@@ -40,13 +57,14 @@ const App = () => {
   const getCurrentUser = async() => {
     await Auth.currentUserInfo().then(
       user => {
-        setPostOwnerUsername(user.username)
-        setPostOwnerId(user.attributes.sub)
+        setLoggedInOwnerUsername(user.username)
+        setLoggedInOwnerId(user.attributes.sub)
       }
     )
   }
-  let subscriptionOnCreate, subscriptionOnDelete, subscriptionOnUpdate;
+  let subscriptionOnCreate, subscriptionOnDelete, subscriptionOnUpdate, subscriptionOnLike;
 
+  // LIVE UPDATES =====
   function setupSubscriptions() {
     // CREATING POST SUBSCRIPTION   
     subscriptionOnCreate = API.graphql(graphqlOperation(onCreatePost)).subscribe({
@@ -79,6 +97,15 @@ const App = () => {
         setSubscribePost(updatedPost);
       },
       error: error => console.warn(error)
+    })
+
+    subscriptionOnLike = API.graphql(graphqlOperation(onCreateLike)).subscribe({
+      next: (postData) => {
+        console.log('running subscribe to liking post')
+        const createdLike = postData.value.data.onCreateLike;
+        setSubscribePost(createdLike)
+
+      }
     })
   }
 
@@ -119,8 +146,33 @@ const App = () => {
 
   }
 
+  const handleLike = async (postId) => {
+    if(likedPost(postId)) { 
+      return setErrorMessage("Can't like your own post");
+    } else {
+      console.log('clicking like button');
+
+      const input = {
+        numberLikes: 1,
+        likeOwnerId: loggedInOwnerId,
+        likeOwnerUsername: loggedInOwnerUsername,
+        likePostId: postId
+      }
+
+      try {
+        const result = await API.graphql(graphqlOperation(createLike, { input }))
+
+        console.log("Liked:", result.data);
+      } catch(err) {
+        console.error(err)
+
+      }
+    }
+  }
+
   useEffect(() => {
     getPosts();
+    likedPost();
     getCurrentUser();
   }, [subscribePost])
   
@@ -130,7 +182,8 @@ const App = () => {
     return () =>  {
       subscriptionOnCreate.unsubscribe();  
       subscriptionOnUpdate.unsubscribe();
-      subscriptionOnDelete.unsubscribe();  
+      subscriptionOnDelete.unsubscribe(); 
+      subscriptionOnLike.unsubscribe(); 
     }
 
   }, [])
@@ -139,13 +192,16 @@ const App = () => {
   return (
     <div className="App">
       <h1>Blog with AWS Amplify</h1>
-      <CreatePost userDetails={{postOwnerId, postOwnerUsername}}/>
+      <CreatePost userDetails={{loggedInOwnerId, loggedInOwnerUsername}}/>
       <DisplayPosts
+        userDetails={{loggedInOwnerId, loggedInOwnerUsername}}
         handleUpdatePost={handleUpdatePost}
         posts={posts}
         editPost={editPost}
         setEditPost={setEditPost}
         handleModel={handleModel}
+        handleLike={handleLike}
+        errorMessage={errorMessage}
       />
     </div>
   );

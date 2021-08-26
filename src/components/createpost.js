@@ -3,18 +3,18 @@ import { createPost } from '../graphql/mutations';
 import {useEffect, useState } from 'react'
 
 function CreatePost({userDetails}) {
-    const { postOwnerUsername, postOwnerId } = userDetails;
+    const { loggedInOwnerUsername, loggedInOwnerId } = userDetails;
     const [ postTitle, setPostTitle] = useState('');
     const [ postBody, setPostBody] = useState('');
 
     const onSubmit = async(e) => {
         e.preventDefault(e);
-        console.log(postOwnerUsername, postOwnerId)
+        console.log(loggedInOwnerUsername, loggedInOwnerId)
         const input = {
-            postOwnerId,
+            postOwnerId: loggedInOwnerId,
             postTitle,
             postBody,
-            postOwnerUsername,
+            postOwnerUsername: loggedInOwnerUsername,
             createdAt: new Date().toISOString()
         }
 

@@ -10,6 +10,8 @@ export const getPost = /* GraphQL */ `
       postTitle
       postBody
       createdAt
+      updatedAt
+
       comments {
         items {
           id
@@ -19,7 +21,6 @@ export const getPost = /* GraphQL */ `
           createdAt
           updatedAt
         }
-        nextToken
       }
       likes {
         items {
@@ -27,12 +28,9 @@ export const getPost = /* GraphQL */ `
           numberLikes
           likeOwnerId
           likeOwnerUsername
-          createdAt
-          updatedAt
         }
-        nextToken
       }
-      updatedAt
+      
     }
   }
 `;
@@ -50,15 +48,26 @@ export const listPosts = /* GraphQL */ `
         postTitle
         postBody
         createdAt
+        updatedAt
+
         comments {
-          nextToken
+          items {
+            id
+            commentOwnerId
+            commentOwnerUsername
+            content
+            createdAt
+          }
         }
         likes {
-          nextToken
+          items {
+            id
+            numberLikes
+            likeOwnerId
+            likeOwnerUsername
+          }
         }
-        updatedAt
       }
-      nextToken
     }
   }
 `;
@@ -68,6 +77,10 @@ export const getComment = /* GraphQL */ `
       id
       commentOwnerId
       commentOwnerUsername
+      content
+      createdAt
+      updatedAt
+
       post {
         id
         postOwnerId
@@ -75,17 +88,17 @@ export const getComment = /* GraphQL */ `
         postTitle
         postBody
         createdAt
+        updatedAt
+        
         comments {
           nextToken
         }
         likes {
           nextToken
         }
-        updatedAt
+       
       }
-      content
-      createdAt
-      updatedAt
+     
     }
   }
 `;
@@ -100,6 +113,10 @@ export const listComments = /* GraphQL */ `
         id
         commentOwnerId
         commentOwnerUsername
+        content
+        createdAt
+        updatedAt
+
         post {
           id
           postOwnerId
@@ -109,9 +126,6 @@ export const listComments = /* GraphQL */ `
           createdAt
           updatedAt
         }
-        content
-        createdAt
-        updatedAt
       }
       nextToken
     }
@@ -124,6 +138,9 @@ export const getLike = /* GraphQL */ `
       numberLikes
       likeOwnerId
       likeOwnerUsername
+      createdAt
+      updatedAt
+
       post {
         id
         postOwnerId
@@ -139,8 +156,7 @@ export const getLike = /* GraphQL */ `
         }
         updatedAt
       }
-      createdAt
-      updatedAt
+     
     }
   }
 `;
