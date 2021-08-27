@@ -146,6 +146,27 @@ const App = () => {
 
   }
 
+  const handleMouseHover = async (postId) => {
+      setIsHovering(!isHovering);
+
+      let innerLikes = postLikedBy;
+      for(let post of posts) {
+        if(post.id === postId) {
+          for(let like of post.likes.items) {
+            innerLikes.push(like.likeOwnerUsername)
+          }
+        }
+        setPostLikedBy(innerLikes);
+      }
+      console.log('posts liked by:', postLikedBy)
+     
+  }
+
+  const handleMouseHoverLeave = async () => {
+      setIsHovering(!isHovering);
+      setPostLikedBy([]);
+  }
+
   const handleLike = async (postId) => {
     if(likedPost(postId)) { 
       return setErrorMessage("Can't like your own post");
@@ -202,6 +223,10 @@ const App = () => {
         handleModel={handleModel}
         handleLike={handleLike}
         errorMessage={errorMessage}
+        handleMouseHover={handleMouseHover}
+        postLikedBy={postLikedBy}
+        isHovering={isHovering}
+        handleMouseHoverLeave={handleMouseHoverLeave}
       />
     </div>
   );

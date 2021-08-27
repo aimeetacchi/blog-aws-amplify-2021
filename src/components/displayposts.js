@@ -1,6 +1,8 @@
 import DeletePost from './deletepost'
 import EditPost from './editpost'
-import { FaThumbsUp } from 'react-icons/fa';
+import { FaThumbsUp, FaSadTear } from 'react-icons/fa';
+
+import UsersWhoLiked from './userswholikedpost';
 
 const DisplayPosts = ({
     posts,
@@ -11,6 +13,10 @@ const DisplayPosts = ({
     handleLike,
     userDetails,
     errorMessage,
+    handleMouseHover,
+    handleMouseHoverLeave,
+    isHovering,
+    postLikedBy,
 }) => {
     const { loggedInOwnerId} = userDetails;
     return(
@@ -18,7 +24,7 @@ const DisplayPosts = ({
             {
                 posts.length >= 1 ? <h1>Blog Posts  <FaThumbsUp /></h1> : <p>You have no posts yet, try posting one</p>
             }
-      
+            <div className="posts-grid">
             {
                 posts && posts.map((post) => {
                     return (
@@ -42,13 +48,33 @@ const DisplayPosts = ({
                                     <DeletePost post={post} />
                                 </>
                             }
+                           
                             <p className="alert">{loggedInOwnerId === post.postOwnerId && errorMessage}</p>
-                            <p style={{width: '25px', cursor: 'pointer'}} onClick={(e) => handleLike(post.id)}><FaThumbsUp/></p> {post.likes.items.length}
+                            <div
+                                onMouseEnter={() => handleMouseHover(post.id)}
+                                onMouseLeave={() => handleMouseHoverLeave()}
+                                onClick={(e) => handleLike(post.id)}
+                            >
+                                <p style={{width: '25px', cursor: 'pointer'}}>
+                                    <FaThumbsUp className={post.likes.items.length > 0 && 'liked'} />
+                                </p><span> {post.likes.items.length} </span>
+                            </div>
+                            {isHovering && 
+                            
+                            <div className="users-liked">
+                                {postLikedBy.length === 0 ? 'Liked by no one yet..' : 'liked by: ' }
+                                {postLikedBy.length === 0 ? <FaSadTear/> : <UsersWhoLiked data={postLikedBy}/>}
+                          
+                            </div>
+                            
+                            }
+                              
                         </div>
                     </div>
                     )
                 })
             }
+            </div>
         </>
     )
 }

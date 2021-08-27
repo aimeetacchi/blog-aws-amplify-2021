@@ -69,7 +69,7 @@ input[type=submit]:hover {
   background-color: #45a049;
 }
 
-.add-post{
+.add-post {
   display: flex;
   flex-direction: column;
   max-width: 100%;
@@ -78,23 +78,35 @@ input[type=submit]:hover {
 }
 
 
-.posts{
+.posts-grid {
   display: flex;
-  flex-direction: column;
-  box-shadow: 1px 1px 9px 7px #36181833;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 
+.posts-grid .posts {
+ width: 100%;
+  margin: 0 20px;
+  box-shadow: 1px 1px 9px 7px #36181833;
   padding: .5rem;
 }
 
+@media(min-width: 740px) {
+  .posts-grid .posts {
+      width: 45%;
+  }
+}
 
-.posts div{
+.posts > div {
   box-shadow: 1px 1px 1px rgb(182, 235, 171);
-  padding: .5rem;
-  margin: .6rem;
   background-color: white;
 }
 
-.modal{
+.liked {
+  fill: blue;
+}
+
+.modal {
    position: absolute;
    top:40px;
    right: 200px;
@@ -103,7 +115,8 @@ input[type=submit]:hover {
    box-shadow: 4px 4px 4px rgb(114, 116, 114);
    animation: move .2s backwards;
 }
-.modal-likes{
+
+.modal-likes {
   position: absolute;
   top:40px;
   right: 200px;
@@ -112,15 +125,18 @@ input[type=submit]:hover {
   box-shadow: 4px 4px 4px rgb(114, 116, 114);
   animation: move .2s backwards;
 }
+
 div {
   border-radius: 5px;
   background-color: #f2f2f2;
   padding: 20px;
 }
- .clean-area  {
+
+.clean-area  {
   border-radius: 0px;
   background-color: #45a049;
 }
+
 .btn-delete {
   display: inline-block;
   width: 100%;
